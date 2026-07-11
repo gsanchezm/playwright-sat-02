@@ -42,6 +42,9 @@
     "skipLibCheck": true,
   },
   "include": [
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "types/**/*.ts",
+    "tests/**/*.ts",
+    "module-*/**/*.ts"
   ]
 }
