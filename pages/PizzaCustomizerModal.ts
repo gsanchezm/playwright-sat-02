@@ -1,4 +1,6 @@
 import { expect, type Locator } from "@playwright/test";
 import { BasePage } from "./BasePage";
 
-export class PizzaCustomizerModalPage extends BasePage{}
+export type PizzaSize = "small" | "medium" | "large" | "family";
+
+export class PizzaCustomizerModal extends BasePage{}
