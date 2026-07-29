@@ -7,7 +7,3 @@ export class CheckoutPage extends BasePage{
   private txtPhone: string = "phone";
   private txtAddress: string = "address";
 }
-
-
-  // Error a proposito que pasa cuando te equivocas o te dan observaciones 
-  // a corregir? YA SE CORRIGO
