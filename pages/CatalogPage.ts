@@ -7,4 +7,7 @@ export class CatalogPage extends BasePage{
   readonly path = "/catalog";
   private cardPizza: string = "pizza-card-";
   private btnAddToCart: string = "add-to-cart-";
+  private btnConfirmAddToCart: string = "confirm-add-to-cart";
+  private btnCategory: string = "category-";
+  private lblCartCount: string = "nav-cart-count";
 }
