@@ -10,4 +10,8 @@ export class CatalogPage extends BasePage{
   private btnConfirmAddToCart: string = "confirm-add-to-cart";
   private btnCategory: string = "category-";
   private lblCartCount: string = "nav-cart-count";
+  
+  private get addToCartButtons(): Locator {
+    return this.page.locator(`[data-testid^="${this.btnAddToCart}"]`);
+  }
 }
