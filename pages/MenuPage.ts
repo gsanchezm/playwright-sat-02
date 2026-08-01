@@ -7,5 +7,8 @@ export class MenuPage extends BasePage {
   private lnkProfile: string = "nav-profile";
   private btnLogout: string = "logout-btn";
   private lblCartCount: string = "nav-cart-count";
-  
+
+  private get cartCount(): Locator {
+    return this.page.getByTestId(this.lblCartCount);
+  }
 }

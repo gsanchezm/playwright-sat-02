@@ -11,4 +11,10 @@ export class CheckoutPage extends BasePage{
   private btnPlaceOrder: string = "place-order-btn";
   private lblOrderTotal: string = "order-total";
   private modalConfirmOrder: string = "confirm-order-modal";
+
+
+
+  private get phoneInput(): Locator {
+    return this.tid(this.txtPhone);
+  }
 }
