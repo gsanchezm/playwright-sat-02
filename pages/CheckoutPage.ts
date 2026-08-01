@@ -6,4 +6,9 @@ export class CheckoutPage extends BasePage{
   private txtFullName: string = "full-name";
   private txtPhone: string = "phone";
   private txtAddress: string = "address";
+
+  private txtZip: string = "zip-code";
+  private btnPlaceOrder: string = "place-order-btn";
+  private lblOrderTotal: string = "order-total";
+  private modalConfirmOrder: string = "confirm-order-modal";
 }
