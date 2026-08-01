@@ -17,6 +17,9 @@ export class CatalogPage extends BasePage {
   private get cartCount(): Locator {
     return this.page.getByTestId(this.lblCartCount);
   }
+  private categoryButton(category: Category): Locator {
+    return this.page.getByTestId(`${this.btnCategory}${category}`);
+  }
 
   async selectCategory(category: Category): Promise<void> {
     await this.categoryButton(category).click();
