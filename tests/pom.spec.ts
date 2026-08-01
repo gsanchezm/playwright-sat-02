@@ -121,7 +121,7 @@ test.describe("POM — PizzaCustomizerModal: choosing options, confirming and ca
     await catalogPage.expectLoaded();
     await catalogPage.openCustomizerForFirst();
 
-    await pizzaCustomizer.expectOpen();.
+    await pizzaCustomizer.expectOpen();
     await pizzaCustomizer.selectSize("large");
     await pizzaCustomizer.toggleTopping("mushrooms");
     await pizzaCustomizer.confirm();
