@@ -14,8 +14,11 @@ export class CatalogPage extends BasePage {
   private get addToCartButtons(): Locator {
     return this.page.locator(`[data-testid^="${this.btnAddToCart}"]`);
   }
-
   private get cartCount(): Locator {
     return this.page.getByTestId(this.lblCartCount);
+  }
+
+  async selectCategory(category: Category): Promise<void> {
+    await this.categoryButton(category).click();
   }
 }
