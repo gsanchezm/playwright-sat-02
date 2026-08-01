@@ -14,7 +14,7 @@ import "dotenv/config";
  */
 export default defineConfig({
   testDir: '.',
-  testMatch: [/tests\/.*\.spec\.ts/, /module-.*\/.*\.spec\.ts/], 
+ // testMatch: [/tests\/.*\.spec\.ts/, /module-.*\/.*\.spec\.ts/], 
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -43,7 +43,15 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    {name: "setup", testMatch: /.*\.setup\.ts/},
+
     {
+      name: "chromium",
+      use: {...devices['Desktop Chrome'], storageState: ".auth/user.json"},
+      dependencies: ["setup"],
+      testMatch: [/tests\/.*\.spec\.ts/]
+    }
+    /* {
       name: 'ui-chromium',
       use: { ...devices['Desktop Chrome'] },
     },
@@ -56,7 +64,7 @@ export default defineConfig({
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
-    },
+    }, */
 
     /* Test against mobile viewports. */
     // {
