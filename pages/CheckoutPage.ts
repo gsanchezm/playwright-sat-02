@@ -11,4 +11,12 @@ export class CheckoutPage extends BasePage{
   private btnPlaceOrder: string = "place-order-btn";
   private lblOrderTotal: string = "order-total";
   private modalConfirmOrder: string = "confirm-order-modal";
+
+  async fillWithMarket(market: Market): Promise<void> {
+    await this.fullNameInput.fill(market.fullName);
+    await this.phoneInput.fill(market.phone);
+    await this.addressInput.fill(market.address);
+    await this.zipInput.fill(market.zipCode);
+  }
 }
+
