@@ -15,6 +15,7 @@ const markets = marketJson as Market[];
 const users = usersJson as User[];
 
 const standardUser = users.find((user) => user.username === "standard_user");
+const marketMX = markets.find((m) => m.code === "MX")!;
 
 //Guard Clause
 if (!standardUser) {
@@ -32,10 +33,10 @@ test.describe("Smoke parametrized by market", () => {
             const loginPage = new LoginPage(page);
             const catalogPage = new CatalogPage(page);
             //Arrange
-            await loginPage.goTo();
+            await loginPage.goto();
 
             //Act 
-            await loginPage.loginMarket(standardUser, market.code)
+            await loginPage.loginInMarket(standardUser, market.code)
 
             //Assert
             await catalogPage.expectLoaded();
