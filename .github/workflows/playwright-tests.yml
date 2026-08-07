@@ -1,19 +1,28 @@
-# DISABLED: superseded by playwright-tests.yml, which fixes the headless/DISPLAY
-# failure on ubuntu-latest (see that file for details). Kept for manual comparison only.
-name: Playwright Tests (legacy, disabled)
+name: Playwright Tests
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      # ubuntu-latest has no X server/DISPLAY, so headed mode fails to launch.
+      # playwright.config.ts only goes headless when HEADLESS === "true".
+      HEADLESS: 'true'
     steps:
     - uses: actions/checkout@v4
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 11
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+        cache: 'pnpm'
     - name: Install dependencies
-      run: npm install -g pnpm && pnpm install
+      run: pnpm install --frozen-lockfile
     - name: Install Playwright Browsers
       run: pnpm exec playwright install --with-deps
     - name: Run Playwright tests
