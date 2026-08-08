@@ -26,7 +26,7 @@ test.describe("Smokewith locators (M02)", () => {
         await page.getByPlaceholder("standard_user").fill(USERNAME);
         await page.getByPlaceholder("••••••••").fill(PASSWORD);
 
-        await page.getByRole("img", {name:"SA flag"}).click();
+        await page.getByRole("img", {name:"US flag"}).click();
        // await page.getByTestId("market-MX").click();
 
         //level 1
@@ -50,7 +50,7 @@ test.describe("Smokewith locators (M02)", () => {
         expect(count).toBeGreaterThan(0); //<1
         expect(count).toBeGreaterThanOrEqual(1); // >= 1
 
-        const fourCheese = await page.getByRole("heading", {level:3}).filter({hasText: "Cheese"}).innerText();
+        const fourCheese = await page.getByRole("heading", {level:2}).filter({hasText: "Cheese"}).innerText();
         console.log(fourCheese);
     });
 });
