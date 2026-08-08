@@ -24,6 +24,7 @@ export class CheckoutPage extends BasePage {
   private txtFullName: string = "full-name";
   private txtPhone: string = "phone";
   private txtAddress: string = "address";
+  private txtColonia: string = "colonia";
   private txtZip: string = "zip-code";
   private btnPlaceOrder: string = "place-order-btn";
   private lblOrderTotal: string = "order-total";
@@ -41,6 +42,10 @@ export class CheckoutPage extends BasePage {
 
   private get addressInput(): Locator {
     return this.tid(this.txtAddress);
+  }
+
+  private get coloniaInput(): Locator {
+    return this.tid(this.txtColonia);
   }
 
   private get zipInput(): Locator {
@@ -65,6 +70,9 @@ export class CheckoutPage extends BasePage {
     await this.fullNameInput.fill(market.fullName);
     await this.phoneInput.fill(market.phone);
     await this.addressInput.fill(market.address);
+    if (market.colonia) {
+      await this.coloniaInput.fill(market.colonia);
+    }
     await this.zipInput.fill(market.zipCode);
   }
 
@@ -74,7 +82,17 @@ export class CheckoutPage extends BasePage {
 
   async checkoutWith(market: Market): Promise<void> {
     await this.fillWithMarket(market);
+    // "Tarjeta de Crédito" is the payment method selected by default, so its
+    // fields are required for the native form to submit at all.
+    await this.fillCard({
+      holder: market.fullName,
+      number: "4242 4242 4242 4242",
+      expMonth: "12",
+      expYear: "30",
+      cvv: "123",
+    });
     await this.placeOrder();
+    await this.confirmOrder();
   }
 
   // --- Assertions ---

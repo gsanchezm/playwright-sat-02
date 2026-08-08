@@ -1,35 +1,144 @@
+# ============================================================================
+# Playwright Tests — workflow de GitHub Actions
+# ============================================================================
+# Este archivo le dice a GitHub: "cuando pase tal evento, prende una o varias
+# máquinas virtuales limpias (llamadas 'runners') y ejecuta estos pasos en
+# orden, de arriba hacia abajo". Es un archivo YAML: la indentación (los
+# espacios, nunca tabs) es lo que define qué línea pertenece a qué bloque,
+# parecido a cómo {} agrupa código en otros lenguajes.
+
+# Nombre que va a aparecer en la pestaña "Actions" del repositorio en GitHub.
 name: Playwright Tests
+
+# "on" define QUÉ EVENTO dispara este workflow automáticamente.
 on:
+  # Se dispara cuando alguien hace "git push"...
   push:
+    # ...pero solo si el push fue directo a la rama main o master.
     branches: [ main, master ]
+  # También se dispara cuando se abre o se actualiza un Pull Request...
   pull_request:
+    # ...que tenga como destino (base) la rama main o master.
     branches: [ main, master ]
+
+# "jobs" es el conjunto de trabajos a ejecutar. Puede haber varios jobs, y
+# por defecto GitHub los corre todos en paralelo, cada uno en su propia
+# máquina virtual desde cero.
 jobs:
+  # "test" es el identificador que le pusimos a este job (podría llamarse
+  # de cualquier forma). En la UI de GitHub vas a ver "test (chromium)",
+  # "test (firefox)", etc. — GitHub agrega el valor de la matrix solo.
   test:
+    # "strategy.matrix" hace que este job se repita una vez por cada valor
+    # de la lista de abajo, cada repetición en su propia máquina virtual y
+    # en paralelo. Lo usamos para correr, en simultáneo, cada "project"
+    # (navegador) que está definido en playwright.config.ts.
+    strategy:
+      # Por defecto, si UNA repetición de la matrix falla, GitHub cancela
+      # las demás que todavía estén corriendo. fail-fast: false apaga ese
+      # comportamiento: así, si por ejemplo "webkit" falla, igual vemos el
+      # resultado completo de "chromium", "firefox" y "ui-chromium".
+      fail-fast: false
+      matrix:
+        # Estos nombres deben coincidir EXACTO con los "name" de los
+        # proyectos en playwright.config.ts. No incluimos "setup" aquí
+        # porque no es un proyecto de pruebas en sí: es el que hace login
+        # y guarda la sesión, y Playwright lo corre solo automáticamente
+        # cuando ve que el proyecto "chromium" lo declara como
+        # "dependencies: ['setup']".
+        project: [chromium, ui-chromium, firefox, webkit]
+
+    # Tiempo máximo (en minutos) que puede correr este job antes de que
+    # GitHub lo mate a la fuerza. Protege contra un test colgado que se
+    # quede corriendo para siempre y gaste minutos gratis del plan.
     timeout-minutes: 60
+
+    # Sobre qué máquina virtual corre el job. "ubuntu-latest" es una
+    # imagen de Linux limpia que GitHub ofrece gratis para repos públicos.
     runs-on: ubuntu-latest
+
+    # Variables de entorno visibles para TODOS los pasos ("steps") de este
+    # job, como si las hubieras hecho "export" antes de cada comando.
     env:
-      # ubuntu-latest has no X server/DISPLAY, so headed mode fails to launch.
-      # playwright.config.ts only goes headless when HEADLESS === "true".
+      # ubuntu-latest no tiene pantalla ni servidor gráfico (X server).
+      # En playwright.config.ts, "headless" solo se activa cuando esta
+      # variable vale exactamente el texto "true"; si no la definimos,
+      # Playwright intenta abrir una ventana real de navegador y falla
+      # de inmediato porque no hay dónde mostrarla.
       HEADLESS: 'true'
+
+    # "steps" es la lista ordenada de comandos/acciones que se ejecutan
+    # uno tras otro, de arriba hacia abajo, dentro de la máquina virtual.
     steps:
-    - uses: actions/checkout@v4
-    - uses: pnpm/action-setup@v4
-      with:
-        version: 11
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-        cache: 'pnpm'
-    - name: Install dependencies
-      run: pnpm install --frozen-lockfile
-    - name: Install Playwright Browsers
-      run: pnpm exec playwright install --with-deps
-    - name: Run Playwright tests
-      run: pnpm exec playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      # Descarga (clona) el código de este repositorio dentro de la
+      # máquina virtual. Sin este paso la máquina estaría vacía: no
+      # habría package.json, ni tests, ni nada que ejecutar.
+      - uses: actions/checkout@v4
+
+      # Instala el gestor de paquetes pnpm en la máquina virtual. Este
+      # proyecto usa pnpm (no npm) según se ve en package.json y en el
+      # archivo pnpm-lock.yaml.
+      - uses: pnpm/action-setup@v4
+        with:
+          # Fija la versión mayor de pnpm a usar, para que la instalación
+          # sea consistente y no cambie sola de un día para otro.
+          version: 11
+
+      # Instala Node.js (el motor que ejecuta JavaScript/TypeScript) en
+      # la máquina virtual.
+      - uses: actions/setup-node@v4
+        with:
+          # "lts/*" = instala la última versión LTS (soporte a largo
+          # plazo, la más estable) de Node.js disponible.
+          node-version: lts/*
+          # Le pide a esta acción que guarde en caché lo que pnpm
+          # descargue, para que las próximas corridas del workflow
+          # instalen las dependencias más rápido.
+          cache: 'pnpm'
+
+      # Descarga las dependencias del proyecto (las que están listadas
+      # en package.json, como @playwright/test) usando pnpm.
+      - name: Install dependencies
+        # "--frozen-lockfile" hace que este paso FALLE si pnpm-lock.yaml
+        # no coincide exactamente con package.json, en vez de generar un
+        # lockfile distinto en silencio. Así garantizamos que en CI se
+        # instalen las mismísimas versiones que usas en tu computadora.
+        run: pnpm install --frozen-lockfile
+
+      # Descarga los navegadores que Playwright necesita controlar
+      # (Chromium, Firefox, WebKit). No vienen instalados por defecto en
+      # la máquina virtual, sin importar qué "project" vayamos a correr.
+      - name: Install Playwright Browsers
+        # "--with-deps" además instala, a nivel de sistema operativo
+        # Linux, las librerías que esos navegadores necesitan para poder
+        # arrancar (sin esto, el navegador se instala pero no abre).
+        run: pnpm exec playwright install --with-deps
+
+      # Corre las pruebas de Playwright.
+      - name: Run Playwright tests
+        # "--project=${{ matrix.project }}" le dice a Playwright que
+        # corra SOLO el proyecto correspondiente a esta repetición de la
+        # matrix (ej: en la máquina de "firefox" corre nada más el
+        # proyecto "firefox"). ${{ }} es la sintaxis de GitHub Actions
+        # para insertar un valor (aquí, el valor actual de la matrix).
+        # Como "chromium" depende de "setup" en playwright.config.ts,
+        # Playwright ejecuta ese login automáticamente antes, aunque
+        # nosotros no lo pidamos explícitamente en este comando.
+        run: pnpm exec playwright test --project=${{ matrix.project }}
+
+      # Sube el reporte HTML de resultados como un "artifact": un archivo
+      # descargable desde la página de este run en GitHub Actions, útil
+      # para revisar capturas, videos y trazas de lo que falló.
+      - uses: actions/upload-artifact@v4
+        # Súbelo siempre, incluso si los tests fallaron — "!cancelled()"
+        # solo evita subirlo si el job fue cancelado a la fuerza (por
+        # ejemplo, manualmente o por timeout).
+        if: ${{ !cancelled() }}
+        with:
+          # El nombre incluye el proyecto porque las 4 repeticiones de la
+          # matrix corren en paralelo: si todas subieran un artifact
+          # llamado igual ("playwright-report"), GitHub Actions rechazaría
+          # las que llegaran después por nombre duplicado.
+          name: playwright-report-${{ matrix.project }}
+          path: playwright-report/
+          retention-days: 30
