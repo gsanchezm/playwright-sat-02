@@ -49,6 +49,13 @@ export class ProfilePage extends BasePage {
    * sin importar cómo lo muestre visualmente el navegador según el
    * locale (dd/mm/yyyy en MX, mm/dd/yyyy en US…). Por eso .fill()
    * con ISO es portable entre markets.
+   *
+   * NOTA: en WebKit, `.fill()` sobre <input type="date"> es poco
+   * confiable — es una limitación conocida del motor (el WebKit que
+   * empaqueta Playwright para Windows/Linux no trae el widget nativo
+   * de date picker que sí tiene Safari en macOS), no un bug de la app
+   * ni de este Page Object. Los tests que dependen de esto se saltan
+   * en el proyecto "webkit" — ver tests/ui/pom.spec.ts.
    */
   async setBirthday(isoDate: string): Promise<void> {
     await this.birthdayInput.fill(isoDate);

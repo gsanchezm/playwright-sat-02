@@ -32,12 +32,14 @@ jobs:
     # "strategy.matrix" hace que este job se repita una vez por cada valor
     # de la lista de abajo, cada repetición en su propia máquina virtual y
     # en paralelo. Lo usamos para correr, en simultáneo, cada "project"
-    # (navegador) que está definido en playwright.config.ts.
+    # definido en playwright.config.ts — cuatro son navegadores (chromium,
+    # ui-chromium, firefox, webkit) y "api" corre las pruebas de API
+    # (tests/api/**) sin abrir ningún navegador.
     strategy:
       # Por defecto, si UNA repetición de la matrix falla, GitHub cancela
       # las demás que todavía estén corriendo. fail-fast: false apaga ese
       # comportamiento: así, si por ejemplo "webkit" falla, igual vemos el
-      # resultado completo de "chromium", "firefox" y "ui-chromium".
+      # resultado completo de "chromium", "firefox", "ui-chromium" y "api".
       fail-fast: false
       matrix:
         # Estos nombres deben coincidir EXACTO con los "name" de los
@@ -46,7 +48,7 @@ jobs:
         # y guarda la sesión, y Playwright lo corre solo automáticamente
         # cuando ve que el proyecto "chromium" lo declara como
         # "dependencies: ['setup']".
-        project: [chromium, ui-chromium, firefox, webkit]
+        project: [chromium, ui-chromium, firefox, webkit, api]
 
     # Tiempo máximo (en minutos) que puede correr este job antes de que
     # GitHub lo mate a la fuerza. Protege contra un test colgado que se
